@@ -264,6 +264,30 @@ function normalizeStatus(s){
   return v;
 }
 
+function parseMoney(v){
+  if(typeof v === 'number') return v;
+
+  let s = String(v || '')
+    .replace('R$', '')
+    .replace(/\s/g, '')
+    .trim();
+
+  if(!s) return 0;
+
+  // Ex: 2.240,20
+  if(s.includes(',') && s.includes('.')){
+    s = s.replace(/\./g, '').replace(',', '.');
+  }
+  // Ex: 2240,20
+  else if(s.includes(',')){
+    s = s.replace(',', '.');
+  }
+
+  // Ex: 2240.20 já correto
+  const n = Number(s);
+  return isNaN(n) ? 0 : n;
+}
+
 function parseDate(s){
   if(!s) return null;
   if(s instanceof Date) return s;
@@ -440,7 +464,7 @@ function render(){
             status:normalizeStatus(r.status),
             nome:r.nome||'',
             data:r.data||'',
-            total:parseFloat(String(r.total||'0').replace(/\./g,'').replace(',','.'))||0,
+            total:parseMoney(r.total),
             source:r.source||'',
             term:r.term||''
           })).filter(o=>o.id&&o.status);
