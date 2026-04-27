@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Zion — Dashboard de Pedidos</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--cream:#F7F4EF;--cream-dk:#EDE8DF;--white:#FFF;--ink:#1A1A18;--ink-mid:#4A4A46;--ink-lt:#8A8A84;--ink-faint:#BFBFB8;--border:#DDD8CF;--border-lt:#EDEAE3;--gold:#C5A36A;--gold-lt:#EBD9B8;--red:#C0392B;--red-lt:#FDECEA;--red-mid:#E57368;--r:6px;--r-lg:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Jost',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;}
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 52px;display:flex;align-items:center;justify-content:space-between;height:68px;}
+.brand{display:flex;align-items:center;gap:18px;}
+.brand-logo{font-family:'Playfair Display',serif;font-size:21px;font-weight:400;letter-spacing:.22em;text-transform:uppercase;}
+.brand-sep{width:1px;height:20px;background:var(--border);}
+.brand-sub{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-lt);font-weight:400;}
+.hdr-right{font-size:11px;color:var(--ink-lt);text-align:right;}
+.hdr-right strong{display:block;color:var(--ink-mid);font-weight:400;font-size:12px;margin-bottom:1px;}
+#update-banner{background:var(--ink);color:rgba(247,244,239,.7);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:8px 52px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+#update-banner a{color:var(--gold);text-decoration:none;border-bottom:1px dotted var(--gold);}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:6px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.main{max-width:1320px;margin:0 auto;padding:40px 52px 64px;}
+.page-title{margin-bottom:32px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.page-title h2{font-family:'Playfair Display',serif;font-size:32px;font-weight:400;line-height:1.1;}
+.page-title h2 em{font-style:italic;color:var(--ink-mid);}
+.meta{font-size:11px;color:var(--ink-lt);text-align:right;line-height:1.6;}
+.sec{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);font-weight:400;margin-bottom:12px;display:flex;align-items:center;gap:12px;}
+.sec::after{content:'';flex:1;height:1px;background:var(--border-lt);}
+.cal-bar{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 20px;margin-bottom:32px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.cal-bar label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-lt);}
+.cal-bar input[type=date]{font-family:'Jost',sans-serif;font-size:12px;color:var(--ink);background:var(--cream);border:1px solid var(--border);border-radius:var(--r);padding:6px 10px;outline:none;}
+.cal-bar input[type=date]:focus{border-color:var(--gold);}
+.cal-sep{font-size:11px;color:var(--ink-faint);}
+.cal-btns{display:flex;gap:6px;flex-wrap:wrap;margin-left:8px;}
+.cal-btn{font-family:'Jost',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--ink-lt);cursor:pointer;transition:all .15s;}
+.cal-btn:hover{border-color:var(--ink-mid);color:var(--ink-mid);}
+.cal-btn.active{background:var(--ink);color:var(--cream);border-color:var(--ink);}
+.cal-info{margin-left:auto;font-size:11px;color:var(--gold);}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:32px;}
+.kpi{background:var(--white);padding:22px 20px 18px;transition:background .15s;}
+.kpi:hover{background:#FDFCF9;}
+.kpi-bar{width:24px;height:2px;margin-bottom:12px;}
+.kpi-bar.green{background:#4CAF82;}.kpi-bar.gold{background:var(--gold);}.kpi-bar.red{background:var(--red-mid);opacity:.8;}
+.kpi-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-lt);margin-bottom:8px;font-weight:400;}
+.kpi-value{font-family:'Playfair Display',serif;font-size:28px;font-weight:400;color:var(--ink);line-height:1;margin-bottom:5px;}
+.kpi-value.gold{color:var(--gold);}.kpi-value.red{color:var(--red-mid);}
+.kpi-sub{font-size:10px;color:var(--ink-lt);}
+.channel-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;}
+.ch-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;}
+.ch-head{padding:18px 22px 14px;border-bottom:1px solid var(--border-lt);display:flex;align-items:center;gap:10px;}
+.ch-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;}
+.ch-g{background:#E8F0FE;color:#3A6FD4;}.ch-m{background:#E7F3FF;color:#1877F2;}
+.ch-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:400;color:var(--ink);}
+.ch-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border-lt);}
+.chstat{background:var(--white);padding:14px 16px;}
+.chstat .lbl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-lt);margin-bottom:4px;font-weight:400;}
+.chstat .val{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;color:var(--ink);}
+.chstat .val.gold{color:var(--gold);}.chstat .val.red{color:var(--red-mid);}
+.ch-chart-row{padding:16px 22px 14px;display:flex;gap:16px;align-items:center;}
+.donut-w{position:relative;width:88px;height:88px;flex-shrink:0;}
+.ch-legend{display:flex;flex-direction:column;gap:7px;font-size:11px;color:var(--ink-lt);}
+.ch-legend span{display:flex;align-items:center;gap:6px;}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot-gold{background:var(--gold);}.dot-red{background:var(--red-mid);opacity:.8;}.dot-lt{background:var(--cream-dk);}
+.utm-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:32px;}
+.utm-head{padding:14px 22px;background:var(--cream);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.utm-badge{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--cream);border-radius:20px;padding:5px 14px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;}
+.utm-badge::before{content:'';width:5px;height:5px;background:var(--gold);border-radius:50%;flex-shrink:0;}
+.utm-total{font-size:11px;color:var(--ink-lt);}
+.utm-row{display:flex;align-items:center;gap:10px;padding:12px 22px;border-bottom:1px solid var(--border-lt);transition:background .12s;}
+.utm-row:last-child{border-bottom:none;}
+.utm-row:hover{background:#FDFCF9;}
+.utm-row.cx{background:#FEFAFA;}
+.utm-row.cx:hover{background:#FDF2F2;}
+.src-pill{font-size:9px;font-weight:500;padding:3px 9px;border-radius:20px;flex-shrink:0;letter-spacing:.06em;text-transform:uppercase;}
+.sg{background:#E8F0FE;color:#3A6FD4;}.sm{background:#E7F3FF;color:#1877F2;}
+.stag{font-size:9px;padding:2px 8px;border-radius:20px;flex-shrink:0;}
+.stag-ok{background:#EAF5EE;color:#2E7D52;}.stag-cx{background:var(--red-lt);color:var(--red);}
+.utm-name{font-size:13px;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.utm-val{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);flex-shrink:0;min-width:110px;text-align:right;}
+.utm-val.striked{color:var(--ink-faint);text-decoration:line-through;}
+.orders-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:24px;}
+.orders-head{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.orders-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:400;color:var(--ink);}
+.frow{display:flex;gap:5px;flex-wrap:wrap;}
+.fbtn{font-family:'Jost',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--ink-lt);cursor:pointer;transition:all .12s;}
+.fbtn:hover{border-color:var(--ink-mid);color:var(--ink-mid);}
+.fbtn.active{background:var(--ink);color:var(--cream);border-color:var(--ink);}
+table{width:100%;border-collapse:collapse;}
+thead th{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);padding:10px 14px;text-align:left;font-weight:400;border-bottom:1px solid var(--border-lt);background:#FDFCFA;}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--border-lt);font-size:12px;color:var(--ink-mid);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr.ru{background:#FFFDF8;}tbody tr.ru:hover{background:#FFF9ED;}
+tbody tr.rc{background:#FEFAFA;}tbody tr.rc:hover{background:#FDF4F4;}
+tbody tr.rcu{background:#FDF2F0;}tbody tr.rcu:hover{background:#FAE8E6;}
+tbody tr:not([class]):hover{background:#FDFCFA;}
+.tdot{text-align:center;width:20px;}
+.udot{display:inline-block;width:5px;height:5px;background:var(--gold);border-radius:50%;}
+.udot.red{background:var(--red-mid);opacity:.8;}
+.legend-note{display:flex;align-items:center;gap:16px;font-size:11px;color:var(--ink-faint);margin-bottom:40px;flex-wrap:wrap;}
+.ln{display:flex;align-items:center;gap:6px;}
+footer{background:var(--ink);color:rgba(247,244,239,.35);padding:20px 52px;font-size:9px;letter-spacing:.16em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+footer span{color:rgba(247,244,239,.6);}
+#modal{display:none;position:fixed;inset:0;background:rgba(26,26,24,.75);z-index:999;align-items:center;justify-content:center;}
+.modal-box{background:var(--white);border-radius:var(--r-lg);padding:32px;max-width:580px;width:90%;position:relative;}
+pre{background:var(--cream);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:10px;overflow-x:auto;line-height:1.5;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.kpi-grid,.channel-grid,.utm-wrap,.orders-wrap{animation:fadeUp .4s ease both;}
+.kpi-grid{animation-delay:.05s;}.channel-grid{animation-delay:.1s;}.utm-wrap{animation-delay:.15s;}.orders-wrap{animation-delay:.2s;}
+@media(max-width:1024px){.kpi-grid{grid-template-columns:repeat(3,1fr);}.ch-stats{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){header,#update-banner{padding:0 20px;}.main{padding:24px 20px 48px;}.kpi-grid{grid-template-columns:1fr 1fr;}.channel-grid{grid-template-columns:1fr;}footer{padding:16px 20px;flex-direction:column;gap:6px;}}
+@media(max-width:480px){.kpi-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo">The Zion</div>
+    <div class="brand-sep"></div>
+    <div class="brand-sub">Dashboard de Performance</div>
+  </div>
+  <div class="hdr-right">
+    <strong id="hdr-range">14 abr – 27 abr 2026</strong>
+    Confidencial
+  </div>
+</header>
+
+<div id="update-banner">
+  <span><span class="live-dot"></span><span id="last-updated">Dados embutidos · importação 27/04/2026</span></span>
+  <span>Atualização automática: <a href="#" onclick="document.getElementById('modal').style.display='flex';return false;">ver como conectar ao Google Sheets →</a></span>
+</div>
+
+<div id="modal">
+  <div class="modal-box">
+    <button onclick="document.getElementById('modal').style.display='none'" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-lt);">✕</button>
+    <p style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:14px;">Atualização automática via Google Sheets</p>
+    <p style="font-size:12px;color:var(--ink-mid);line-height:1.8;margin-bottom:12px;">Crie um <strong>Google Apps Script</strong> como intermediário (resolve o problema de CORS):</p>
+    <ol style="font-size:12px;color:var(--ink-mid);line-height:2.2;padding-left:18px;margin-bottom:14px;">
+      <li>Acesse <strong>script.google.com</strong> → Novo projeto</li>
+      <li>Cole o código abaixo e salve (Ctrl+S)</li>
+      <li><strong>Implantar → Nova implantação → App da Web</strong></li>
+      <li>Acesso: <strong>"Qualquer pessoa"</strong> → Implantar → copie a URL</li>
+      <li>No HTML, substitua <code>APPS_SCRIPT_URL = ''</code> pela URL copiada</li>
+    </ol>
+    <pre>function doGet() {
+  const ss = SpreadsheetApp.openById(
+    '1UOk4fkZnp7uGhTA3ol335aAWp1Wb9Ypjw3IgH4m95i4'
+  );
+  const data = ss.getSheets()[0].getDataRange().getValues();
+  const hdrs = data[0].map(h => h.toString().toLowerCase().trim());
+  const seen = new Set();
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    const r = {};
+    hdrs.forEach((h, j) => r[h] = String(data[i][j] || '').trim());
+    const k = r['pedido'] + '|' + r['status'];
+    if (!r['pedido'] || !r['status'] || seen.has(k)) continue;
+    seen.add(k);
+    rows.push(r);
+  }
+  return ContentService
+    .createTextOutput(JSON.stringify({ orders: rows }))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+    <p style="font-size:11px;color:var(--ink-lt);margin-top:10px;">Após isso o dashboard buscará dados ao vivo toda vez que for aberto.</p>
+  </div>
+</div>
+
+<main class="main">
+  <div class="page-title">
+    <h2>Pedidos &amp; <em>Atribuição</em></h2>
+    <p class="meta" id="meta-txt">—</p>
+  </div>
+
+  <div class="sec">Filtro por período</div>
+  <div class="cal-bar">
+    <label>De</label><input type="date" id="df">
+    <span class="cal-sep">→</span>
+    <label>Até</label><input type="date" id="dt">
+    <div class="cal-btns">
+      <button class="cal-btn" onclick="preset(7,this)">7 dias</button>
+      <button class="cal-btn" onclick="preset(14,this)">14 dias</button>
+      <button class="cal-btn active" onclick="preset(0,this)">Tudo</button>
+    </div>
+    <span class="cal-info" id="cal-info"></span>
+  </div>
+
+  <div class="sec">Visão geral</div>
+  <div class="kpi-grid" id="kpis"></div>
+
+  <div class="sec">Performance por canal</div>
+  <div class="channel-grid" id="channels"></div>
+
+  <div class="sec">Pedidos rastreados via UTM <span style="font-size:9px;text-transform:none;letter-spacing:0;color:var(--ink-faint);margin-left:4px;">— atribuídos ao seu trabalho</span></div>
+  <div class="utm-wrap" id="utm-wrap"></div>
+
+  <div class="sec">Todos os pedidos</div>
+  <div class="orders-wrap">
+    <div class="orders-head">
+      <span class="orders-title">Lista completa</span>
+      <div class="frow" id="fbar"></div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr>
+          <th class="tdot"></th>
+          <th style="width:110px;">Pedido</th>
+          <th>Cliente</th>
+          <th style="width:80px;">Data</th>
+          <th style="width:100px;">Source</th>
+          <th style="width:90px;">Status</th>
+          <th style="width:130px;text-align:right;">Total</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="legend-note">
+    <div class="ln"><span class="udot"></span>UTM confirmado</div>
+    <div class="ln"><span class="udot red"></span>UTM cancelado</div>
+    <div class="ln" style="background:var(--red-lt);border:1px solid var(--red-mid);border-radius:4px;padding:2px 8px;color:var(--red-mid);font-size:10px;">Linha vermelha = cancelado</div>
+  </div>
+</main>
+
+<footer>
+  <span>The Zion Joias · Ouro 18K &amp; Prata</span>
+  Dashboard confidencial · 2026
+  <span>thezion.com.br</span>
+</footer>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby6pS0QQfyo59zaHFKklq17CaOdFMbH7lJLkZb6d4AS1YGJv5qbYtHUnTdABXLUF7jcvg/exec';
+
+const ORDERS = [
+  {id:"851209E0C3",status:"confirmed",nome:"Britto Heloise",data:"14/04/2026",total:2240.2,source:"ig",term:"ad_img_diadasmaes_nossasenhora_pdp_07042026"},
+  {id:"CE1D0A3F69",status:"confirmed",nome:"Tânia A. Martins Santos",data:"15/04/2026",total:2255.2,source:"",term:""},
+  {id:"6B13BA4E3B",status:"confirmed",nome:"Flavia Trevisan Arruda",data:"15/04/2026",total:4533.5,source:"",term:""},
+  {id:"6E8A356B12",status:"confirmed",nome:"Silvana Goulart",data:"15/04/2026",total:1949.15,source:"",term:""},
+  {id:"85C5FE027D",status:"confirmed",nome:"Camila Maira Almeida",data:"16/04/2026",total:4125.17,source:"",term:""},
+  {id:"227A495B24",status:"confirmed",nome:"Marcela Lutfalla",data:"16/04/2026",total:4462,source:"",term:""},
+  {id:"E463AF9DA5",status:"confirmed",nome:"Karina Primon",data:"16/04/2026",total:1125.2,source:"",term:""},
+  {id:"9EF78FA386",status:"confirmed",nome:"Helena Vidigal",data:"16/04/2026",total:6003.75,source:"",term:""},
+  {id:"4718D2AB98",status:"confirmed",nome:"Gabriela Cruz",data:"16/04/2026",total:3625.2,source:"ig",term:""},
+  {id:"ED1DCAE948",status:"confirmed",nome:"Lia Vecchia",data:"17/04/2026",total:2525.2,source:"",term:""},
+  {id:"E2E1680D90",status:"confirmed",nome:"Rafael H. Gaio Barbosa",data:"17/04/2026",total:2394,source:"",term:""},
+  {id:"B1F0DCB488",status:"confirmed",nome:"Anthony Baldavia",data:"17/04/2026",total:2125.2,source:"",term:""},
+  {id:"B4FCC144C1",status:"confirmed",nome:"Anderson Vieira",data:"17/04/2026",total:2851.2,source:"",term:""},
+  {id:"DFD12FC095",status:"confirmed",nome:"Graziele Ferraz Bottura",data:"17/04/2026",total:5503.5,source:"",term:""},
+  {id:"B6C5F7B4FE",status:"confirmed",nome:"Renata Andrade",data:"17/04/2026",total:12011.99,source:"",term:""},
+  {id:"17AB2BAD5D",status:"confirmed",nome:"Lenara Costa",data:"17/04/2026",total:15195.07,source:"",term:""},
+  {id:"F766D81856",status:"confirmed",nome:"Lenara Costa (2)",data:"17/04/2026",total:14242.43,source:"",term:""},
+  {id:"39F74AE2F4",status:"confirmed",nome:"Isabella Ribeiro",data:"17/04/2026",total:2801.06,source:"",term:""},
+  {id:"F703E6B3F8",status:"confirmed",nome:"Daniela Cordeiro Turra",data:"18/04/2026",total:1599.12,source:"",term:""},
+  {id:"24C3453323",status:"confirmed",nome:"Maria Fernanda M. Gomes",data:"19/04/2026",total:3951.06,source:"ig",term:"carrossel-dinamico_all-products_25062025"},
+  {id:"3C416A6623",status:"confirmed",nome:"Mariana Andre",data:"19/04/2026",total:3462.5,source:"",term:""},
+  {id:"1B96170B38",status:"confirmed",nome:"Sofia Larcher Escaleira",data:"19/04/2026",total:2162.5,source:"google",term:"zion joias"},
+  {id:"E8144E0CEC",status:"confirmed",nome:"Katiane Cavalcante",data:"19/04/2026",total:1638.5,source:"IGShopping",term:""},
+  {id:"C944F35A49",status:"canceled",nome:"Alisson Jesus",data:"",total:24093.45,source:"google",term:""},
+  {id:"54F0ACBFA7",status:"confirmed",nome:"Luísa Amalfi",data:"20/04/2026",total:1716.2,source:"",term:""},
+  {id:"DCB2F148DE",status:"canceled",nome:"Alisson Santos de Jesus",data:"",total:30986.42,source:"google",term:""},
+  {id:"306557EC68",status:"confirmed",nome:"Jaqueline Gaspar",data:"20/04/2026",total:3962,source:"",term:""},
+  {id:"86B6FBF77B",status:"canceled",nome:"Fernanda N. R. Medeiros",data:"21/03/2026",total:970.2,source:"",term:""},
+  {id:"A4B79CF25C",status:"canceled",nome:"Rafael H. Gaio Barbosa",data:"",total:2394,source:"",term:""},
+  {id:"7499586574",status:"canceled",nome:"Ramon Barbosa",data:"",total:4179.75,source:"google",term:""},
+  {id:"403928DE31",status:"confirmed",nome:"Maria Clara Amaral",data:"20/04/2026",total:1107.92,source:"",term:""},
+  {id:"5787EE450E",status:"confirmed",nome:"Regina Abduch",data:"20/04/2026",total:2500.2,source:"",term:""},
+  {id:"A841423B37",status:"canceled",nome:"Yara Zamuner",data:"06/04/2026",total:8575.2,source:"google",term:"thezionjoias"},
+  {id:"444639EE21",status:"confirmed",nome:"Enzo Ferrari",data:"20/04/2026",total:2380,source:"",term:""},
+  {id:"5F39025F22",status:"confirmed",nome:"Thammy Gasparim",data:"20/04/2026",total:2365.2,source:"",term:""},
+  {id:"AAD9CEEAC2",status:"confirmed",nome:"Julia Charak",data:"20/04/2026",total:835,source:"facebook",term:"carrossel-dinamico_all-products_25062025"},
+  {id:"6197B582FF",status:"confirmed",nome:"ANA CAROLINA LEITAO",data:"21/04/2026",total:4513.49,source:"",term:""},
+  {id:"24AED46844",status:"confirmed",nome:"Bruna Resende Gemero",data:"21/04/2026",total:1192.5,source:"",term:""},
+  {id:"BEA31E8799",status:"confirmed",nome:"Denise Braga",data:"21/04/2026",total:2678.16,source:"google",term:"zion joias"},
+  {id:"818AB869CA",status:"confirmed",nome:"Monize Donega",data:"21/04/2026",total:825.2,source:"google",term:"zion joias"},
+  {id:"353B33D7DB",status:"confirmed",nome:"Marcela Cardoso Sgarioni",data:"22/04/2026",total:7766.39,source:"",term:""},
+  {id:"C7D61A9364",status:"confirmed",nome:"José Miguel De Oliveira Fernandes",data:"22/04/2026",total:2663.56,source:"",term:""},
+  {id:"44F3E2F80F",status:"confirmed",nome:"ANDRE KADOMOTO",data:"22/04/2026",total:2405.2,source:"",term:""},
+  {id:"C6CF06BFD7",status:"confirmed",nome:"Adriana Farano",data:"22/04/2026",total:3349.71,source:"",term:""},
+  {id:"0AA2A8164E",status:"confirmed",nome:"Camila Del Grande",data:"22/04/2026",total:2658.6,source:"",term:""},
+  {id:"5F17AE3521",status:"confirmed",nome:"Alexandre Xavier",data:"22/04/2026",total:2248.2,source:"",term:""},
+  {id:"04FA575325",status:"confirmed",nome:"Beatriz Ferrari",data:"22/04/2026",total:1182.5,source:"",term:""},
+  {id:"3BAE036D2F",status:"confirmed",nome:"Fernanda Penteado",data:"22/04/2026",total:1352.5,source:"",term:""},
+  {id:"FDE343B236",status:"confirmed",nome:"Marcella Zarattini",data:"22/04/2026",total:2802.5,source:"",term:""},
+  {id:"783D79BC80",status:"confirmed",nome:"Eduardo Fasolo",data:"22/04/2026",total:8153.61,source:"",term:""},
+  {id:"6624B14556",status:"confirmed",nome:"Bruna F B Ribeiro",data:"22/04/2026",total:8046,source:"",term:""},
+  {id:"B392A6F9FF",status:"confirmed",nome:"Keila Rodrigues",data:"22/04/2026",total:1848.61,source:"ig",term:"ad_vid_shantal_anel_03042026"},
+  {id:"23A1EAE24C",status:"canceled",nome:"Rodolfo Desiderio",data:"",total:4162.45,source:"google",term:""},
+  {id:"DE9837E210",status:"confirmed",nome:"Simone Silva",data:"23/04/2026",total:865.2,source:"",term:""},
+  {id:"FA74603DCE",status:"canceled",nome:"Georgia Bacelar",data:"20/03/2026",total:9627.69,source:"",term:""},
+  {id:"11ACC4DB8C",status:"confirmed",nome:"Felipe Maiorino Campana",data:"23/04/2026",total:2280,source:"",term:""},
+  {id:"40E1EF946A",status:"confirmed",nome:"Jovita Vieira",data:"23/04/2026",total:3509.42,source:"",term:""},
+  {id:"9946C50E2E",status:"confirmed",nome:"GREGORY SENTER",data:"23/04/2026",total:2142.5,source:"",term:""},
+  {id:"9AC47F0D92",status:"confirmed",nome:"Monica Llorente",data:"23/04/2026",total:2240.2,source:"ig",term:"ad_img_diadasmaes_nossasenhora_colar_07042026"},
+  {id:"A785ABB9A2",status:"canceled",nome:"Naira Bassul",data:"",total:5942,source:"",term:""},
+  {id:"A2C721D555",status:"confirmed",nome:"Aline Freitas Couto",data:"23/04/2026",total:18023.29,source:"",term:""},
+  {id:"2FC4B2FF35",status:"confirmed",nome:"Aline Freitas Couto (2)",data:"23/04/2026",total:8550,source:"",term:""},
+  {id:"54729656B8",status:"confirmed",nome:"Daniel Araújo de Freitas",data:"23/04/2026",total:3179.07,source:"",term:""},
+  {id:"C625D1BE7E",status:"confirmed",nome:"Ananda Barros",data:"23/04/2026",total:1640,source:"",term:""},
+  {id:"AF5619EB71",status:"confirmed",nome:"Luiz Patelli",data:"23/04/2026",total:1691.06,source:"",term:""},
+  {id:"978AD67AED",status:"confirmed",nome:"Roberta W. de Moraes",data:"23/04/2026",total:630.2,source:"google",term:"zion joias"},
+  {id:"5B828BCCAA",status:"confirmed",nome:"Helga Maria F Alves",data:"23/04/2026",total:4412.5,source:"",term:""},
+  {id:"64250C3802",status:"confirmed",nome:"Charles Renda Sepulchre",data:"24/04/2026",total:1075.2,source:"",term:""},
+  {id:"8BC14E94C0",status:"confirmed",nome:"Thiago Da Silva Fenili",data:"24/04/2026",total:2275,source:"",term:""},
+  {id:"5AF425439F",status:"confirmed",nome:"Talita Passos",data:"24/04/2026",total:1136.7,source:"google",term:"zion joias"},
+  {id:"3C341C4057",status:"canceled",nome:"Larissa Gaia",data:"",total:1411.47,source:"",term:""},
+  {id:"634E456CAC",status:"confirmed",nome:"Rafaela Nicolazzi",data:"24/04/2026",total:14313.61,source:"",term:""},
+  {id:"DA2B7F3764",status:"confirmed",nome:"Marcelo de Arruda Botelho",data:"24/04/2026",total:2100,source:"",term:""},
+  {id:"519C70F693",status:"confirmed",nome:"Diego Mestriner Colli",data:"24/04/2026",total:16850.2,source:"",term:""},
+  {id:"FEE4F423D3",status:"canceled",nome:"Marcelle Figueiredo",data:"",total:3448.5,source:"",term:""},
+  {id:"B2FAD2E11C",status:"confirmed",nome:"Frederico Timóteo de Castro",data:"24/04/2026",total:5681.99,source:"",term:""},
+  {id:"5229B79335",status:"confirmed",nome:"Higor Pazini Pereira",data:"25/04/2026",total:4652.5,source:"",term:""},
+  {id:"52802CEF99",status:"confirmed",nome:"Livia Siqueira",data:"25/04/2026",total:1897.2,source:"",term:""},
+  {id:"D285AE65DE",status:"confirmed",nome:"Lais Pinto",data:"25/04/2026",total:14451,source:"",term:""},
+  {id:"441E894072",status:"confirmed",nome:"Juliana De Sales Machado",data:"25/04/2026",total:4071.91,source:"",term:""},
+  {id:"3E6403335B",status:"confirmed",nome:"Guilherme Barreto",data:"25/04/2026",total:2980,source:"",term:""},
+  {id:"31A7D77FF4",status:"confirmed",nome:"Samira Vilela",data:"26/04/2026",total:3745.07,source:"facebook",term:"ad_vid_esmeralda-colares_14012026"},
+  {id:"46CDB185DC",status:"confirmed",nome:"Beatriz Malta",data:"26/04/2026",total:1075,source:"",term:""},
+  {id:"D8026F9014",status:"confirmed",nome:"Maria Fernanda Hakim Caramella",data:"26/04/2026",total:20120,source:"",term:""},
+  {id:"D59DEBC0D2",status:"confirmed",nome:"Gabriela Rizzi",data:"26/04/2026",total:1022.7,source:"ig",term:""},
+  {id:"712F570487",status:"confirmed",nome:"Priscila Lira",data:"26/04/2026",total:3756.04,source:"",term:""},
+  {id:"7BEA027187",status:"confirmed",nome:"André Lopes",data:"26/04/2026",total:3552.5,source:"",term:""},
+  {id:"9E8EEA3394",status:"confirmed",nome:"Luana Da Silva",data:"26/04/2026",total:857.92,source:"ig",term:""},
+  {id:"DE3F3B9782",status:"confirmed",nome:"PEDRO ASSIS PINTO RIBEIRO",data:"26/04/2026",total:3512.5,source:"",term:""},
+  {id:"AEE05C9BA5",status:"confirmed",nome:"Renata Ferreira Jardim Colli",data:"26/04/2026",total:2825.2,source:"",term:""},
+  {id:"C7D40CCE5E",status:"confirmed",nome:"Patricia Fernandes",data:"26/04/2026",total:600.25,source:"google",term:"zion joias"},
+  {id:"4EF1616F59",status:"confirmed",nome:"Marcelle Figueiredo",data:"27/04/2026",total:3448.5,source:"",term:""},
+  {id:"B722ADD416",status:"canceled",nome:"Adenildo Dias Oliveira",data:"",total:11254.2,source:"google",term:""},
+  {id:"86E475ABD7",status:"confirmed",nome:"Mauricy Alex Cintra Soares",data:"27/04/2026",total:2922.7,source:"google",term:""},
+  {id:"CB6E9F1180",status:"confirmed",nome:"LAIS SOARES",data:"27/04/2026",total:1890,source:"",term:""},
+];
+
+function isUTM(o){
+  const s=(o.source||'').toLowerCase(), t=(o.term||'').trim();
+  if(s.includes('google')) return true;
+  if(s.includes('facebook')) return true;
+  if(s.includes('ig') && t!=='') return true;
+  return false;
+}
+const isGoogle=o=>(o.source||'').toLowerCase().includes('google');
+const isMeta=o=>['facebook','ig','meta','igshopping'].some(s=>(o.source||'').toLowerCase().includes(s));
+const fmt=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtK=v=>v>=1000?'R$ '+(v/1000).toFixed(1)+'K':fmt(v);
+function parseDate(s){if(!s)return null;const m=s.match(/(\d{2})\/(\d{2})\/(\d{4})/);return m?new Date(+m[3],+m[2]-1,+m[1]):null;}
+
+let ALL=[], df_=null, dt_=null, tf_='all', gCh=null, mCh=null;
+
+function filtered(){
+  return ALL.filter(o=>{
+    if(!df_&&!dt_)return true;
+    const d=parseDate(o.data);
+    if(!d)return !df_;
+    if(df_&&d<df_)return false;
+    if(dt_&&d>dt_)return false;
+    return true;
+  });
+}
+
+document.getElementById('df').addEventListener('change',e=>{
+  df_=e.target.value?new Date(e.target.value+'T00:00:00'):null;
+  document.querySelectorAll('.cal-btn').forEach(b=>b.classList.remove('active'));
+  render();
+});
+document.getElementById('dt').addEventListener('change',e=>{
+  dt_=e.target.value?new Date(e.target.value+'T23:59:59'):null;
+  document.querySelectorAll('.cal-btn').forEach(b=>b.classList.remove('active'));
+  render();
+});
+function preset(days,btn){
+  document.querySelectorAll('.cal-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(days===0){df_=null;dt_=null;document.getElementById('df').value='';document.getElementById('dt').value='';}
+  else{
+    const to=new Date();to.setHours(23,59,59);
+    const fr=new Date();fr.setDate(fr.getDate()-days+1);fr.setHours(0,0,0);
+    df_=fr;dt_=to;
+    document.getElementById('df').value=fr.toISOString().slice(0,10);
+    document.getElementById('dt').value=to.toISOString().slice(0,10);
+  }
+  render();
+}
+
+function render(){
+  const ords=filtered();
+  const conf=ords.filter(o=>o.status==='confirmed');
+  const canc=ords.filter(o=>o.status==='canceled');
+  const utmC=conf.filter(isUTM), utmX=canc.filter(isUTM);
+  const rC=conf.reduce((s,o)=>s+o.total,0), rX=canc.reduce((s,o)=>s+o.total,0);
+  const rUC=utmC.reduce((s,o)=>s+o.total,0), rUX=utmX.reduce((s,o)=>s+o.total,0);
+
+  const wd=ords.filter(o=>parseDate(o.data));
+  if(wd.length){
+    const ds=wd.map(o=>parseDate(o.data)).sort((a,b)=>a-b);
+    const df=d=>d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    document.getElementById('cal-info').textContent=`${df(ds[0])} – ${df(ds[ds.length-1])} · ${ords.length} pedidos`;
+    document.getElementById('hdr-range').textContent=`${df(ds[0])} – ${df(ds[ds.length-1])}`;
+    document.getElementById('meta-txt').innerHTML=`${ords.length} pedidos · ${conf.length} confirmados · ${canc.length} cancelados<br>Atualizado: ${new Date().toLocaleString('pt-BR')}`;
+  }
+
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">Confirmados</div><div class="kpi-value">${conf.length}</div><div class="kpi-sub">${fmtK(rC)}</div></div>
+    <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">Cancelados</div><div class="kpi-value red">${canc.length}</div><div class="kpi-sub">${fmtK(rX)}</div></div>
+    <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">UTM confirmados</div><div class="kpi-value gold">${utmC.length}</div><div class="kpi-sub">${fmtK(rUC)}</div></div>
+    <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">UTM cancelados</div><div class="kpi-value red">${utmX.length}</div><div class="kpi-sub">${fmtK(rUX)}</div></div>
+    <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">Participação UTM</div><div class="kpi-value gold">${rC>0?((rUC/rC)*100).toFixed(1):0}%</div><div class="kpi-sub">Da receita confirmada</div></div>
+    <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">Taxa cancelamento</div><div class="kpi-value red">${ords.length>0?((canc.length/ords.length)*100).toFixed(1):0}%</div><div class="kpi-sub">Do total de pedidos</div></div>
+  `;
+
+  const gC2=conf.filter(isGoogle),gX=canc.filter(isGoogle),gUC=utmC.filter(isGoogle),gUX=utmX.filter(isGoogle);
+  const mC2=conf.filter(isMeta),mX=canc.filter(isMeta),mUC=utmC.filter(isMeta),mUX=utmX.filter(isMeta);
+
+  const ch=(id,icon,cls,name,c,x,uc,ux)=>`
+  <div class="ch-card">
+    <div class="ch-head"><div class="ch-icon ${cls}">${icon}</div><div class="ch-name">${name}</div></div>
+    <div class="ch-stats">
+      <div class="chstat"><div class="lbl">Confirmados</div><div class="val">${c.length}</div></div>
+      <div class="chstat"><div class="lbl">Cancelados</div><div class="val red">${x.length}</div></div>
+      <div class="chstat"><div class="lbl">UTM conf.</div><div class="val gold">${uc.length} · ${fmtK(uc.reduce((s,o)=>s+o.total,0))}</div></div>
+      <div class="chstat"><div class="lbl">UTM canc.</div><div class="val red">${ux.length} · ${fmtK(ux.reduce((s,o)=>s+o.total,0))}</div></div>
+    </div>
+    <div class="ch-chart-row">
+      <div class="donut-w"><canvas id="${id}" role="img" aria-label="${name}">${c.length} confirmados, ${x.length} cancelados.</canvas></div>
+      <div class="ch-legend">
+        <span><span class="dot dot-gold"></span>Confirmados (${c.length})</span>
+        <span><span class="dot dot-red"></span>Cancelados (${x.length})</span>
+        <span><span class="dot dot-lt"></span>Sem rastreio</span>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('channels').innerHTML=ch('gChart','G','ch-g','Google Ads',gC2,gX,gUC,gUX)+ch('mChart','f','ch-m','Meta — Facebook &amp; Instagram',mC2,mX,mUC,mUX);
+  if(gCh)gCh.destroy(); if(mCh)mCh.destroy();
+  const mkD=(id,a,b)=>new Chart(document.getElementById(id),{type:'doughnut',data:{labels:['Confirmados','Cancelados'],datasets:[{data:[a,b],backgroundColor:['#C5A36A','#E57368'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}`}}}}});
+  setTimeout(()=>{gCh=mkD('gChart',gC2.length,gX.length);mCh=mkD('mChart',mC2.length,mX.length);},50);
+
+  const allUTM=[...utmC.map(o=>({...o,_s:'confirmed'})),...utmX.map(o=>({...o,_s:'canceled'}))]
+    .sort((a,b)=>a._s!==b._s?(a._s==='confirmed'?-1:1):b.total-a.total);
+  document.getElementById('utm-wrap').innerHTML=`
+    <div class="utm-head">
+      <div class="utm-badge">${allUTM.length} pedidos rastreados</div>
+      <span class="utm-total">Confirmado: ${fmt(rUC)} &nbsp;·&nbsp; <span style="color:var(--red-mid)">Cancelado: ${fmt(rUX)}</span></span>
+    </div>
+    ${allUTM.length===0?'<div style="padding:18px 22px;font-size:12px;color:var(--ink-faint);">Nenhum pedido rastreado no período.</div>':
+    allUTM.map(o=>`<div class="utm-row${o._s==='canceled'?' cx':''}">
+      <span class="src-pill ${isGoogle(o)?'sg':'sm'}">${isGoogle(o)?'Google':'Meta'}</span>
+      <span class="stag ${o._s==='confirmed'?'stag-ok':'stag-cx'}">${o._s==='confirmed'?'confirmado':'cancelado'}</span>
+      <span class="utm-name">${o.nome}</span>
+      <span class="utm-val${o._s==='canceled'?' striked':''}">${fmt(o.total)}</span>
+    </div>`).join('')}`;
+
+  const flabels=['Todos','Confirmados','Cancelados','UTM','Google','Meta'];
+  const fkeys=['all','confirmed','canceled','utm','google','meta'];
+  document.getElementById('fbar').innerHTML=fkeys.map((f,i)=>`<button class="fbtn${tf_===f?' active':''}" onclick="setF('${f}',this)">${flabels[i]}</button>`).join('');
+  renderTable(ords);
+}
+
+function setF(f,btn){tf_=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTable(filtered());}
+
+function renderTable(ords){
+  let data=[...ords];
+  if(tf_==='confirmed')data=data.filter(o=>o.status==='confirmed');
+  else if(tf_==='canceled')data=data.filter(o=>o.status==='canceled');
+  else if(tf_==='utm')data=data.filter(isUTM);
+  else if(tf_==='google')data=data.filter(isGoogle);
+  else if(tf_==='meta')data=data.filter(isMeta);
+  data.sort((a,b)=>a.status!==b.status?(a.status==='confirmed'?-1:1):b.total-a.total);
+  document.getElementById('tbody').innerHTML=data.map(o=>{
+    const u=isUTM(o),cx=o.status==='canceled';
+    const rc=u&&cx?'rcu':cx?'rc':u?'ru':'';
+    const src=o.source?`<span class="src-pill ${isGoogle(o)?'sg':'sm'}" style="font-size:9px;">${o.source}</span>`:'<span style="color:var(--ink-faint);font-size:11px;">—</span>';
+    const st=cx?'<span class="stag stag-cx">cancelado</span>':'<span class="stag stag-ok">confirmado</span>';
+    const tv=`<span style="font-family:'Playfair Display',serif;font-size:14px;${u&&!cx?'color:var(--gold);':''}${cx?'text-decoration:line-through;color:var(--ink-faint);':''}">${fmt(o.total)}</span>`;
+    return `<tr${rc?' class="'+rc+'"':''}>
+      <td class="tdot">${u?`<span class="udot${cx?' red':''}"></span>`:''}</td>
+      <td style="font-family:monospace;font-size:10px;color:var(--ink-faint);">${o.id}</td>
+      <td style="color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${o.nome}</td>
+      <td style="color:var(--ink-faint);font-size:11px;">${o.data?o.data.split(',')[0]:'—'}</td>
+      <td>${src}</td><td>${st}</td>
+      <td style="text-align:right;">${tv}</td>
+    </tr>`;
+  }).join('');
+}
+
+(async()=>{
+  let live=null;
+  if(APPS_SCRIPT_URL){
+    try{const r=await fetch(APPS_SCRIPT_URL);if(r.ok){const j=await r.json();if(j.orders){live=j.orders.map(r=>({id:r.pedido||'',status:(r.status||'').toLowerCase(),nome:r.nome||'',data:r.data||'',total:parseFloat((r.total||'0').replace(',','.'))||0,source:r.source||'',term:r.term||''})).filter(o=>o.id&&o.status);document.getElementById('last-updated').textContent='Ao vivo · '+new Date().toLocaleString('pt-BR');}}}catch(e){}
+  }
+  ALL=live||ORDERS;
+  render();
+})();
+</script>
+</body>
+</html>
