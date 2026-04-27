@@ -257,6 +257,13 @@ const isMeta=o=>['facebook','ig','meta','igshopping'].some(s=>(o.source||'').toL
 const fmt=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtK=v=>v>=1000?'R$ '+(v/1000).toFixed(1).replace('.',',')+'K':fmt(v);
 
+function normalizeStatus(s){
+  const v = String(s || '').trim().toLowerCase();
+  if(['canceled','cancelado','cancelada','cancelled','cancelada pelo cliente'].includes(v)) return 'canceled';
+  if(['confirmed','confirmado','confirmada','pago','paid','aprovado','aprovada'].includes(v)) return 'confirmed';
+  return v;
+}
+
 function parseDate(s){
   if(!s) return null;
   if(s instanceof Date) return s;
@@ -281,7 +288,10 @@ function filtered(){
 
     const d=parseDate(o.data);
 
-    if(!d) return false;
+    // Alguns pedidos cancelados chegam do Sheets sem data.
+    // Para não sumirem dos filtros, mantemos esses cancelados visíveis.
+    if(!d) return o.status === 'canceled';
+
     if(df_ && d < df_) return false;
     if(dt_ && d > dt_) return false;
 
@@ -427,7 +437,7 @@ function render(){
         if(j.orders){
           live=j.orders.map(r=>({
             id:r.pedido||'',
-            status:(r.status||'').toLowerCase(),
+            status:normalizeStatus(r.status),
             nome:r.nome||'',
             data:r.data||'',
             total:parseFloat(String(r.total||'0').replace(/\./g,'').replace(',','.'))||0,
@@ -446,5 +456,4 @@ function render(){
 </script>
 </body>
 </html>
-
 <!-- redeploy -->
