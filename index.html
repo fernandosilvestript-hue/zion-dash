@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Zion — Dashboard de Pedidos</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{--cream:#F7F4EF;--cream-dk:#EDE8DF;--white:#FFF;--ink:#1A1A18;--ink-mid:#4A4A46;--ink-lt:#8A8A84;--ink-faint:#BFBFB8;--border:#DDD8CF;--border-lt:#EDEAE3;--gold:#C5A36A;--gold-lt:#EBD9B8;--red:#C0392B;--red-lt:#FDECEA;--red-mid:#E57368;--r:6px;--r-lg:10px;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -37,7 +36,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 5
 .cal-btn:hover{border-color:var(--ink-mid);color:var(--ink-mid);}
 .cal-btn.active{background:var(--ink);color:var(--cream);border-color:var(--ink);}
 .cal-info{margin-left:auto;font-size:11px;color:var(--gold);}
-.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:32px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:32px;}
 .kpi{background:var(--white);padding:22px 20px 18px;transition:background .15s;}
 .kpi:hover{background:#FDFCF9;}
 .kpi-bar{width:24px;height:2px;margin-bottom:12px;}
@@ -246,16 +245,23 @@ const ORDERS = [
   {id:"CB6E9F1180",status:"confirmed",nome:"LAIS SOARES",data:"27/04/2026",total:1890,source:"",term:""},
 ];
 
-function isUTM(o){
-  const s=(o.source||'').toLowerCase(), t=(o.term||'').trim();
-  if(s.includes('google')) return true;
-  if(s.includes('facebook')) return true;
-  if(s.includes('ig') && t!=='') return true;
-  return false;
+function clean(v){
+  return String(v || '').trim().toLowerCase();
 }
 
-const isGoogle=o=>(o.source||'').toLowerCase().includes('google');
-const isMeta=o=>['facebook','ig','meta','igshopping'].some(s=>(o.source||'').toLowerCase().includes(s));
+const isGoogle = o => clean(o.source).includes('google');
+
+const isMeta = o => {
+  const source = clean(o.source);
+  const term = String(o.term || '').trim();
+
+  if(source.includes('facebook')) return true;
+  if(source === 'ig' && term !== '') return true;
+
+  return false;
+};
+
+const isUTM = o => isGoogle(o) || isMeta(o);
 const fmt=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtK=v=>v>=1000?'R$ '+(v/1000).toFixed(1).replace('.',',')+'K':fmt(v);
 
@@ -409,68 +415,98 @@ function render(){
     document.getElementById('meta-txt').innerHTML=`0 pedidos · 0 confirmados · 0 cancelados<br>Atualizado: ${new Date().toLocaleString('pt-BR')}`;
   }
 
-  document.getElementById('kpis').innerHTML=`
-    <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">Confirmados</div><div class="kpi-value">${conf.length}</div><div class="kpi-sub">${fmtK(rC)}</div></div>
-    <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">Cancelados</div><div class="kpi-value red">${canc.length}</div><div class="kpi-sub">${fmtK(rX)}</div></div>
-    <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">UTM confirmados</div><div class="kpi-value gold">${utmC.length}</div><div class="kpi-sub">${fmtK(rUC)}</div></div>
-    <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">UTM cancelados</div><div class="kpi-value red">${utmX.length}</div><div class="kpi-sub">${fmtK(rUX)}</div></div>
-    <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">Participação UTM</div><div class="kpi-value gold">${rC>0?((rUC/rC)*100).toFixed(1).replace('.',','):0}%</div><div class="kpi-sub">Da receita confirmada</div></div>
-    <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">Taxa cancelamento</div><div class="kpi-value red">${ords.length>0?((canc.length/ords.length)*100).toFixed(1).replace('.',','):0}%</div><div class="kpi-sub">Do total de pedidos</div></div>
-  `;
+  const totalOrders = ords.length;
+const totalRevenue = rC + rX;
+const utmTotal = utmC.length + utmX.length;
+const utmRevenueTotal = rUC + rUX;
+
+document.getElementById('kpis').innerHTML=`
+  <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">Pedidos confirmados</div><div class="kpi-value">${conf.length}</div><div class="kpi-sub">Quantidade</div></div>
+  <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">Pedidos cancelados</div><div class="kpi-value red">${canc.length}</div><div class="kpi-sub">Quantidade</div></div>
+  <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">Pedidos totais</div><div class="kpi-value gold">${totalOrders}</div><div class="kpi-sub">Quantidade</div></div>
+
+  <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">Valor confirmados</div><div class="kpi-value">${fmtK(rC)}</div><div class="kpi-sub">${fmt(rC)}</div></div>
+  <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">Valor cancelados</div><div class="kpi-value red">${fmtK(rX)}</div><div class="kpi-sub">${fmt(rX)}</div></div>
+  <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">Valor total</div><div class="kpi-value gold">${fmtK(totalRevenue)}</div><div class="kpi-sub">${fmt(totalRevenue)}</div></div>
+
+  <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">UTM confirmados</div><div class="kpi-value">${utmC.length}</div><div class="kpi-sub">Quantidade</div></div>
+  <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">UTM cancelados</div><div class="kpi-value red">${utmX.length}</div><div class="kpi-sub">Quantidade</div></div>
+  <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">UTM totais</div><div class="kpi-value gold">${utmTotal}</div><div class="kpi-sub">Quantidade</div></div>
+
+  <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">Valor UTM confirmado</div><div class="kpi-value">${fmtK(rUC)}</div><div class="kpi-sub">${fmt(rUC)}</div></div>
+  <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">Valor UTM cancelado</div><div class="kpi-value red">${fmtK(rUX)}</div><div class="kpi-sub">${fmt(rUX)}</div></div>
+  <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">Valor UTM total</div><div class="kpi-value gold">${fmtK(utmRevenueTotal)}</div><div class="kpi-sub">${fmt(utmRevenueTotal)}</div></div>
+
+  <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">Participação UTM</div><div class="kpi-value gold">${conf.length>0?((utmC.length/conf.length)*100).toFixed(1).replace('.',','):0}%</div><div class="kpi-sub">Nos pedidos confirmados</div></div>
+`;
+
 
   const gC2=conf.filter(isGoogle),gX=canc.filter(isGoogle),gUC=utmC.filter(isGoogle),gUX=utmX.filter(isGoogle);
   const mC2=conf.filter(isMeta),mX=canc.filter(isMeta),mUC=utmC.filter(isMeta),mUX=utmX.filter(isMeta);
 
-  const ch=(id,icon,cls,name,c,x,uc,ux)=>`
-  <div class="ch-card">
-    <div class="ch-head"><div class="ch-icon ${cls}">${icon}</div><div class="ch-name">${name}</div></div>
-    <div class="ch-stats">
-      <div class="chstat"><div class="lbl">Confirmados</div><div class="val">${c.length}</div></div>
-      <div class="chstat"><div class="lbl">Cancelados</div><div class="val red">${x.length}</div></div>
-      <div class="chstat"><div class="lbl">UTM conf.</div><div class="val gold">${uc.length} · ${fmtK(uc.reduce((s,o)=>s+o.total,0))}</div></div>
-      <div class="chstat"><div class="lbl">UTM canc.</div><div class="val red">${ux.length} · ${fmtK(ux.reduce((s,o)=>s+o.total,0))}</div></div>
-    </div>
-    <div class="ch-chart-row">
-      <div class="donut-w"><canvas id="${id}" role="img" aria-label="${name}"></canvas></div>
-      <div class="ch-legend">
-        <span><span class="dot dot-gold"></span>Confirmados (${c.length})</span>
-        <span><span class="dot dot-red"></span>Cancelados (${x.length})</span>
-        <span><span class="dot dot-lt"></span>Sem rastreio</span>
-      </div>
-    </div>
-  </div>`;
+const ch=(icon,cls,name,c,x,uc,ux)=>`
+<div class="ch-card">
+  <div class="ch-head"><div class="ch-icon ${cls}">${icon}</div><div class="ch-name">${name}</div></div>
+  <div class="ch-stats">
+    <div class="chstat"><div class="lbl">Confirmados</div><div class="val">${c.length}</div></div>
+    <div class="chstat"><div class="lbl">Cancelados</div><div class="val red">${x.length}</div></div>
+    <div class="chstat"><div class="lbl">UTM conf.</div><div class="val gold">${uc.length} · ${fmtK(uc.reduce((s,o)=>s+o.total,0))}</div></div>
+    <div class="chstat"><div class="lbl">UTM canc.</div><div class="val red">${ux.length} · ${fmtK(ux.reduce((s,o)=>s+o.total,0))}</div></div>
+  </div>
+</div>`;
 
-  document.getElementById('channels').innerHTML=ch('gChart','G','ch-g','Google Ads',gC2,gX,gUC,gUX)+ch('mChart','f','ch-m','Meta — Facebook &amp; Instagram',mC2,mX,mUC,mUX);
-
-  if(gCh)gCh.destroy();
-  if(mCh)mCh.destroy();
-
-  const mkD=(id,a,b)=>new Chart(document.getElementById(id),{
-    type:'doughnut',
-    data:{labels:['Confirmados','Cancelados'],datasets:[{data:[a,b],backgroundColor:['#C5A36A','#E57368'],borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}`}}}}
-  });
-
-  setTimeout(()=>{
-    gCh=mkD('gChart',gC2.length,gX.length);
-    mCh=mkD('mChart',mC2.length,mX.length);
-  },50);
+document.getElementById('channels').innerHTML=
+  ch('G','ch-g','Google Ads',gC2,gX,gUC,gUX)+
+  ch('f','ch-m','Meta — Facebook & Instagram',mC2,mX,mUC,mUX);
 
   const allUTM=[...utmC.map(o=>({...o,_s:'confirmed'})),...utmX.map(o=>({...o,_s:'canceled'}))]
     .sort((a,b)=>a._s!==b._s?(a._s==='confirmed'?-1:1):b.total-a.total);
 
-  document.getElementById('utm-wrap').innerHTML=`
-    <div class="utm-head">
-      <div class="utm-badge">${allUTM.length} pedidos rastreados</div>
-      <span class="utm-total">Confirmado: ${fmt(rUC)} &nbsp;·&nbsp; <span style="color:var(--red-mid)">Cancelado: ${fmt(rUX)}</span></span>
+document.getElementById('utm-wrap').innerHTML=`
+  <div class="utm-head">
+    <div class="utm-badge">${allUTM.length} pedidos rastreados</div>
+    <span class="utm-total">Confirmado: ${fmt(rUC)} &nbsp;·&nbsp; <span style="color:var(--red-mid)">Cancelado: ${fmt(rUX)}</span></span>
+  </div>
+
+  ${allUTM.length===0?'<div style="padding:18px 22px;font-size:12px;color:var(--ink-faint);">Nenhum pedido rastreado no período.</div>':`
+    <div style="overflow-x:auto;">
+      <table class="utm-table">
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Canal</th>
+            <th>Source</th>
+            <th>Term</th>
+            <th>Status</th>
+            <th style="text-align:right;">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${allUTM.map(o=>`
+            <tr class="${o._s==='canceled'?'utm-canceled':''}">
+              <td style="font-family:monospace;color:var(--ink-faint);">${o.id}</td>
+              <td>${o.nome}</td>
+              <td><span class="src-pill ${isGoogle(o)?'sg':'sm'}">${isGoogle(o)?'Google':'Meta'}</span></td>
+              <td>${o.source || '—'}</td>
+              <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${o.term || '—'}</td>
+              <td><span class="stag ${o._s==='confirmed'?'stag-ok':'stag-cx'}">${o._s==='confirmed'?'confirmado':'cancelado'}</span></td>
+              <td style="text-align:right;font-family:'Playfair Display',serif;${o._s==='canceled'?'text-decoration:line-through;color:var(--ink-faint);':'color:var(--ink);'}">${fmt(o.total)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
     </div>
-    ${allUTM.length===0?'<div style="padding:18px 22px;font-size:12px;color:var(--ink-faint);">Nenhum pedido rastreado no período.</div>':
-    allUTM.map(o=>`<div class="utm-row${o._s==='canceled'?' cx':''}">
-      <span class="src-pill ${isGoogle(o)?'sg':'sm'}">${isGoogle(o)?'Google':'Meta'}</span>
-      <span class="stag ${o._s==='confirmed'?'stag-ok':'stag-cx'}">${o._s==='confirmed'?'confirmado':'cancelado'}</span>
-     <span class="utm-name"><span style="font-family:monospace;font-size:10px;color:var(--ink-faint);margin-right:8px;">${o.id}</span>${o.nome}</span>
-      <span class="utm-val${o._s==='canceled'?' striked':''}">${fmt(o.total)}</span>
-    </div>`).join('')}`;
+  `}
+`;
+.utm-table{width:100%;border-collapse:collapse;}
+.utm-table th{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);padding:10px 14px;text-align:left;font-weight:400;border-bottom:1px solid var(--border-lt);background:#FDFCFA;}
+.utm-table td{padding:11px 14px;border-bottom:1px solid var(--border-lt);font-size:12px;color:var(--ink-mid);vertical-align:middle;}
+.utm-table tr:last-child td{border-bottom:none;}
+.utm-table tr:hover{background:#FDFCF9;}
+.utm-table tr.utm-canceled{background:#FEFAFA;}
+.utm-table tr.utm-canceled:hover{background:#FDF2F2;}
+
 }
 
 (async()=>{
