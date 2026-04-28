@@ -122,7 +122,9 @@ footer span{color:rgba(247,244,239,.6);}
     <div class="cal-btns">
       <button class="cal-btn" onclick="preset(7,this)">7 dias</button>
       <button class="cal-btn" onclick="preset(14,this)">14 dias</button>
-      <button class="cal-btn active" onclick="preset(0,this)">Tudo</button>
+<button class="cal-btn" onclick="preset(30,this)">30 dias</button>
+<button class="cal-btn active" onclick="preset(0,this)">Tudo</button>
+
     </div>
     <span class="cal-info" id="cal-info"></span>
   </div>
@@ -288,6 +290,26 @@ function parseMoney(v){
   return isNaN(n) ? 0 : n;
 }
 
+function parseMoney(v){
+  if(typeof v === 'number') return v;
+
+  let s = String(v || '')
+    .replace('R$', '')
+    .split(' ').join('')
+    .trim();
+
+  if(!s) return 0;
+
+  if(s.includes(',') && s.includes('.')){
+    s = s.split('.').join('').replace(',', '.');
+  } else if(s.includes(',')){
+    s = s.replace(',', '.');
+  }
+
+  const n = Number(s);
+  return isNaN(n) ? 0 : n;
+}
+
 function parseDate(s){
   if(!s) return null;
   if(s instanceof Date) return s;
@@ -312,10 +334,11 @@ function filtered(){
 
     const d=parseDate(o.data);
 
-    // Alguns pedidos cancelados chegam do Sheets sem data.
-    // Para não sumirem dos filtros, mantemos esses cancelados visíveis.
-    if(!d) return o.status === 'canceled';
+    // Mantém todos os cancelados na análise,
+    // mesmo quando vêm sem data ou fora do período.
+    if(o.status === 'canceled') return true;
 
+    if(!d) return false;
     if(df_ && d < df_) return false;
     if(dt_ && d > dt_) return false;
 
@@ -445,7 +468,7 @@ function render(){
     allUTM.map(o=>`<div class="utm-row${o._s==='canceled'?' cx':''}">
       <span class="src-pill ${isGoogle(o)?'sg':'sm'}">${isGoogle(o)?'Google':'Meta'}</span>
       <span class="stag ${o._s==='confirmed'?'stag-ok':'stag-cx'}">${o._s==='confirmed'?'confirmado':'cancelado'}</span>
-      <span class="utm-name">${o.nome}</span>
+     <span class="utm-name"><span style="font-family:monospace;font-size:10px;color:var(--ink-faint);margin-right:8px;">${o.id}</span>${o.nome}</span>
       <span class="utm-val${o._s==='canceled'?' striked':''}">${fmt(o.total)}</span>
     </div>`).join('')}`;
 }
@@ -480,4 +503,5 @@ function render(){
 </script>
 </body>
 </html>
+
 <!-- redeploy -->
