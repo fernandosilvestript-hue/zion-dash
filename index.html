@@ -72,6 +72,13 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 5
 .utm-row:hover{background:#FDFCF9;}
 .utm-row.cx{background:#FEFAFA;}
 .utm-row.cx:hover{background:#FDF2F2;}
+.utm-table{width:100%;border-collapse:collapse;}
+.utm-table th{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);padding:10px 14px;text-align:left;font-weight:400;border-bottom:1px solid var(--border-lt);background:#FDFCFA;}
+.utm-table td{padding:11px 14px;border-bottom:1px solid var(--border-lt);font-size:12px;color:var(--ink-mid);vertical-align:middle;}
+.utm-table tr:last-child td{border-bottom:none;}
+.utm-table tr:hover{background:#FDFCF9;}
+.utm-table tr.utm-canceled{background:#FEFAFA;}
+.utm-table tr.utm-canceled:hover{background:#FDF2F2;}
 .src-pill{font-size:9px;font-weight:500;padding:3px 9px;border-radius:20px;flex-shrink:0;letter-spacing:.06em;text-transform:uppercase;}
 .sg{background:#E8F0FE;color:#3A6FD4;}.sm{background:#E7F3FF;color:#1877F2;}
 .stag{font-size:9px;padding:2px 8px;border-radius:20px;flex-shrink:0;}
@@ -277,30 +284,6 @@ function parseMoney(v){
 
   let s = String(v || '')
     .replace('R$', '')
-    .replace(/\s/g, '')
-    .trim();
-
-  if(!s) return 0;
-
-  // Ex: 2.240,20
-  if(s.includes(',') && s.includes('.')){
-    s = s.replace(/\./g, '').replace(',', '.');
-  }
-  // Ex: 2240,20
-  else if(s.includes(',')){
-    s = s.replace(',', '.');
-  }
-
-  // Ex: 2240.20 já correto
-  const n = Number(s);
-  return isNaN(n) ? 0 : n;
-}
-
-function parseMoney(v){
-  if(typeof v === 'number') return v;
-
-  let s = String(v || '')
-    .replace('R$', '')
     .split(' ').join('')
     .trim();
 
@@ -342,7 +325,7 @@ function filtered(){
 
     // Mantém todos os cancelados na análise,
     // mesmo quando vêm sem data ou fora do período.
-    if(o.status === 'canceled') return true;
+    if(!d) return false;
 
     if(!d) return false;
     if(df_ && d < df_) return false;
@@ -499,14 +482,6 @@ document.getElementById('utm-wrap').innerHTML=`
     </div>
   `}
 `;
-.utm-table{width:100%;border-collapse:collapse;}
-.utm-table th{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);padding:10px 14px;text-align:left;font-weight:400;border-bottom:1px solid var(--border-lt);background:#FDFCFA;}
-.utm-table td{padding:11px 14px;border-bottom:1px solid var(--border-lt);font-size:12px;color:var(--ink-mid);vertical-align:middle;}
-.utm-table tr:last-child td{border-bottom:none;}
-.utm-table tr:hover{background:#FDFCF9;}
-.utm-table tr.utm-canceled{background:#FEFAFA;}
-.utm-table tr.utm-canceled:hover{background:#FDF2F2;}
-
 }
 
 (async()=>{
