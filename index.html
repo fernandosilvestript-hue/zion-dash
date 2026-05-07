@@ -449,12 +449,12 @@ function render(){
     <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">Pedidos confirmados</div><div class="kpi-value">${conf.length}</div><div class="kpi-sub">Quantidade</div></div>
     <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">Pedidos cancelados</div><div class="kpi-value red">${canc.length}</div><div class="kpi-sub">Quantidade</div></div>
     <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">Pedidos totais</div><div class="kpi-value gold">${ords.length}</div><div class="kpi-sub">Quantidade</div></div>
-    <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">UTM confirmados</div><div class="kpi-value">${utmC.length}</div><div class="kpi-sub">Quantidade</div></div>
+    <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">UTM confirmados</div><div class="kpi-value">${utmC.length}</div><div class="kpi-sub">Quantidade</div><div style="margin-top:8px;font-size:10px;color:var(--gold);letter-spacing:.06em;">${utmPct}% dos confirmados</div></div>
     <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">UTM cancelados</div><div class="kpi-value red">${utmX.length}</div><div class="kpi-sub">Quantidade</div></div>
     <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">Valor confirmados</div><div class="kpi-value">${fmtK(rC)}</div><div class="kpi-sub">${fmt(rC)}</div></div>
     <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">Valor cancelados</div><div class="kpi-value red">${fmtK(rX)}</div><div class="kpi-sub">${fmt(rX)}</div></div>
     <div class="kpi"><div class="kpi-bar gold"></div><div class="kpi-label">Valor total</div><div class="kpi-value gold">${fmtK(rC+rX)}</div><div class="kpi-sub">${fmt(rC+rX)}</div></div>
-    <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">Valor UTM confirmado</div><div class="kpi-value">${fmtK(rUC)}</div><div class="kpi-sub">${fmt(rUC)}</div><div style="margin-top:8px;font-size:10px;color:var(--gold);letter-spacing:.06em;">${utmPct}% dos confirmados</div></div>
+    <div class="kpi"><div class="kpi-bar green"></div><div class="kpi-label">Valor UTM confirmado</div><div class="kpi-value">${fmtK(rUC)}</div><div class="kpi-sub">${fmt(rUC)}</div><div style="margin-top:8px;font-size:10px;color:var(--gold);letter-spacing:.06em;">${rC>0?((rUC/rC)*100).toFixed(1).replace('.',','):0}% do valor confirmado</div></div>
     <div class="kpi"><div class="kpi-bar red"></div><div class="kpi-label">Valor UTM cancelado</div><div class="kpi-value red">${fmtK(rUX)}</div><div class="kpi-sub">${fmt(rUX)}</div></div>
   `;
 
